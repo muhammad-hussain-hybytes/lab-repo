@@ -1,4 +1,4 @@
-name: Deploy S3 Bucket using Terraform and OIDC
+ name: Deploy S3 Bucket using Terraform and OIDC
 
 on:
   push:
