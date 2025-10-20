@@ -1,37 +1,34 @@
 name: Deploy S3 Bucket using Terraform and OIDC
 
-# This workflow runs whenever code is pushed to the main branch
 on:
   push:
-    branches: [ main ]
+    branches: [ main ]   # Runs automatically when you push to main branch
 
-# OIDC requires these permissions
 permissions:
-  id-token: write
+  id-token: write        # Required for OpenID Connect (OIDC)
   contents: read
 
 jobs:
   deploy:
     runs-on: ubuntu-latest
 
-    # Environment variables (replace these with your values)
     env:
       AWS_REGION: us-east-1
-      AWS_ROLE_ARN: arn:aws:iam::<your-account-id>:role/<your-oidc-role-name>
+      AWS_ROLE_ARN: arn:aws:iam::499360698962:role/Access-S3
 
     steps:
       # Step 1: Checkout your code
-      - name: Checkout code
+      - name: Checkout repository
         uses: actions/checkout@v4
 
-      # Step 2: Authenticate to AWS using OpenID Connect
+      # Step 2: Authenticate to AWS using OIDC
       - name: Configure AWS credentials using OIDC
         uses: aws-actions/configure-aws-credentials@v4
         with:
           role-to-assume: ${{ env.AWS_ROLE_ARN }}
           aws-region: ${{ env.AWS_REGION }}
 
-      # Step 3: (Optional) Verify the authentication worked
+      # Step 3: Verify AWS identity
       - name: Verify AWS identity
         run: aws sts get-caller-identity
 
@@ -47,6 +44,6 @@ jobs:
       - name: Terraform Plan
         run: terraform plan
 
-      # Step 7: Apply Terraform (creates your S3 bucket)
+      # Step 7: Apply Terraform changes (create S3 bucket)
       - name: Terraform Apply
         run: terraform apply -auto-approve
